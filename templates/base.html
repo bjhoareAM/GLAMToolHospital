@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}GLAM Tool Hospital{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Later you can replace or supplement this with Codex CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="app-header">
+        <div>
+            <h1 class="app-title">GLAM Tool Hospital</h1>
+            <p class="app-subtitle">A lightweight reporting route for Wikimedia and GLAM tool issues.</p>
+        </div>
+
+        <nav class="app-nav">
+            <a href="{{ url_for('home') }}">Submit issue</a>
+            <a href="{{ url_for('board') }}">Live tracker</a>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

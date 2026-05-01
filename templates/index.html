@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Submit issue - GLAM Tool Hospital{% endblock %}
+
+{% block content %}
+
+<section class="intro-card">
+    <h2>Submit a tool issue</h2>
+
+    <p>
+        This form helps create a structured support ticket for Wikimedia and GLAM-related tools.
+        You do not need to use technical language or have a Phabricator account.
+    </p>
+
+    <p>
+        Reports submitted here are filed to Phabricator by the GLAM Tool Hospital bot account.
+        Only include information you are comfortable appearing in a public task.
+    </p>
+</section>
+
+{% if message %}
+<div class="message {% if is_error %}message-error{% else %}message-success{% endif %}">
+    {{ message }}
+</div>
+{% endif %}
+
+<div class="step-progress">
+    Step <span id="currentStepNumber">1</span> of <span id="totalStepNumber">5</span>
+</div>
+
+<form method="post" action="{{ url_for('submit') }}" id="ticketForm" enctype="multipart/form-data">
+
+    <section class="form-step active" data-step="1">
+        <h2>Who is submitting this report?</h2>
+
+        <p class="hint">
+            You do not need a Phabricator account. A wiki username helps others understand who submitted the report.
+            Email is optional.
+        </p>
+
+        <label for="wiki_username">Wiki username *</label>
+        <div class="user-prefix-field">
+            <span class="user-prefix">User:</span>
+            <input
+                type="text"
+                id="wiki_username"
+                name="wiki_username"
+                required
+                value="{{ form_data.get('wiki_username', '') }}"
+                placeholder="ExampleUser"
+                autocomplete="username"
+            >
+        </div>
+
+        <label for="email">Email address, optional</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            value="{{ form_data.get('email', '') }}"
+            placeholder="Only include this if you are comfortable being contacted by email"
+        >
+
+        <div class="button-row">
+            <button type="button" class="button-primary next-step">Next</button>
+        </div>
+    </section>
+
+
+    <section class="form-step" data-step="2">
+        <h2>What tool or project area is this about?</h2>
+
+        <p class="hint">
+            It is okay if you are not sure. Choose the closest option.
+        </p>
+
+        <label for="project_tag">Tool or project area *</label>
+        <select id="project_tag" name="project_tag" required>
+            <option value="">Select one</option>
+            {% for option in project_tag_options %}
+            <option value="{{ option.value }}" {% if form_data.get('project_tag') == option.value %}selected{% endif %}>
+                {{ option.label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label for="tool_name">Tool name, if known</label>
+        <input
+            type="text"
+            id="tool_name"
+            name="tool_name"
+            value="{{ form_data.get('tool_name', '') }}"
+            placeholder="For example: GLAMorgan, OpenRefine, ISA Tool, Pattypan"
+        >
+
+        <label for="tool_url">Tool URL, if you have it</label>
+        <input
+            type="url"
+            id="tool_url"
+            name="tool_url"
+            value="{{ form_data.get('tool_url', '') }}"
+            placeholder="https://..."
+        >
+
+        <div class="button-row">
+            <button type="button" class="button-secondary previous-step">Back</button>
+            <button type="button" class="button-primary next-step">Next</button>
+        </div>
+    </section>
+
+
+    <section class="form-step" data-step="3">
+        <h2>What do you need help with?</h2>
+
+        <label for="issue_type">Type of help needed *</label>
+        <select id="issue_type" name="issue_type" required>
+            <option value="">Select one</option>
+            {% for option in issue_type_options %}
+            <option value="{{ option.value }}" {% if form_data.get('issue_type') == option.value %}selected{% endif %}>
+                {{ option.label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label for="impact">How much is this affecting your work?</label>
+        <select id="impact" name="impact">
+            <option value="">Select one</option>
+            {% for value, label in impact_options %}
+            <option value="{{ value }}" {% if form_data.get('impact') == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <div class="button-row">
+            <button type="button" class="button-secondary previous-step">Back</button>
+            <button type="button" class="button-primary next-step">Next</button>
+        </div>
+    </section>
+
+
+    <section class="form-step" data-step="4">
+        <h2>What were you trying to do?</h2>
+
+        <label for="summary">Brief summary *</label>
+        <input
+            type="text"
+            id="summary"
+            name="summary"
+            required
+            value="{{ form_data.get('summary', '') }}"
+            placeholder="For example: I cannot get pageviews for a Commons category"
+        >
+
+        <label for="goal">What were you trying to do?</label>
+        <textarea
+            id="goal"
+            name="goal"
+            placeholder="For example: I was trying to collect monthly reporting metrics for images in a Commons category."
+        >{{ form_data.get('goal', '') }}</textarea>
+
+        <div class="button-row">
+            <button type="button" class="button-secondary previous-step">Back</button>
+            <button type="button" class="button-primary next-step">Next</button>
+        </div>
+    </section>
+
+
+    <section class="form-step" data-step="5">
+        <h2>What happened?</h2>
+
+        <label for="description">What happened? *</label>
+        <textarea
+            id="description"
+            name="description"
+            required
+            placeholder="Describe what happened. You can paste error messages or links here."
+        >{{ form_data.get('description', '') }}</textarea>
+
+        <label for="expected_result">What did you expect to happen?</label>
+        <textarea id="expected_result" name="expected_result">{{ form_data.get('expected_result', '') }}</textarea>
+
+        <label for="actual_result">What actually happened?</label>
+        <textarea id="actual_result" name="actual_result">{{ form_data.get('actual_result', '') }}</textarea>
+
+        <label for="steps_tried">What have you already tried?</label>
+        <textarea
+            id="steps_tried"
+            name="steps_tried"
+            placeholder="It is fine to write 'nothing yet' or 'I am not sure'."
+        >{{ form_data.get('steps_tried', '') }}</textarea>
+
+        <label for="extra_context">Any extra context?</label>
+        <textarea
+            id="extra_context"
+            name="extra_context"
+            placeholder="Paste links, task numbers, Commons categories, file names, or anything else that might help."
+        >{{ form_data.get('extra_context', '') }}</textarea>
+
+        <label for="screenshots">Screenshots or supporting files, optional</label>
+        <input
+            type="file"
+            id="screenshots"
+            name="screenshots"
+            multiple
+            accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,image/png,image/jpeg,image/gif,image/webp,application/pdf"
+        >
+
+        <p class="hint">
+            You can upload up to {{ max_screenshots }} files. Supported formats: PNG, JPG, GIF, WEBP, and PDF.
+        </p>
+
+        <div class="review-note">
+            <strong>Ready to submit?</strong>
+            <p>This will create a public Phabricator ticket using the information you have provided.</p>
+        </div>
+
+        <div class="button-row">
+            <button type="button" class="button-secondary previous-step">Back</button>
+            <button type="submit" class="button-primary">Submit request</button>
+        </div>
+    </section>
+
+</form>
+
+{% endblock %}

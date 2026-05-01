@@ -23,7 +23,7 @@ PHABRICATOR_BASE_URL = os.getenv(
     "https://phabricator.wikimedia.org"
 )
 API_TOKEN = os.getenv("PHABRICATOR_API_TOKEN")
-PROJECT_ID = os.getenv("PHABRICATOR_PROJECT_ID", "2087")
+PROJECT_ID = os.getenv("PHABRICATOR_PROJECT_ID", "8675")
 
 APP_NAME = os.getenv("APP_NAME", "GLAM-Tool-Hospital")
 APP_VERSION = os.getenv("APP_VERSION", "0.1")

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Live tracker - GLAM Tool Hospital{% endblock %}
+
+{% block content %}
+
+<h2>Live tracker</h2>
+
+<div class="status-card">
+    <p><strong>Refreshed at:</strong> {{ refreshed_at }}</p>
+    <p><strong>Current filter:</strong> {{ current_filter or "None" }}</p>
+    <p><strong>Showing:</strong> {{ shown_count }} of {{ total_count }} tasks</p>
+</div>
+
+<div class="filter-box">
+    <form class="filter-form" action="{{ url_for('board') }}" method="get">
+        <div>
+            <label for="tool">Filter by GLAM tool</label>
+            <input
+                id="tool"
+                name="tool"
+                value="{{ current_filter }}"
+                placeholder="e.g. OpenRefine, GLAMorgan, ISA"
+            >
+        </div>
+
+        <button type="submit" class="button-primary">Filter</button>
+        <a href="{{ url_for('board') }}" class="button-link">Clear</a>
+    </form>
+
+    <div class="quick-filters">
+        <strong>Quick filters:</strong>
+        {% for tool in quick_filters %}
+            <a
+                href="{{ url_for('board') }}?tool={{ tool|urlencode }}"
+                class="{% if current_filter|lower == tool|lower %}active-filter{% endif %}"
+            >{{ tool }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+{% if error %}
+<div class="message message-error">
+    <strong>Error:</strong> {{ error }}
+</div>
+{% endif %}
+
+<div class="columns">
+    {% for column_name, tasks in grouped.items() %}
+        <section class="column">
+            <h3>{{ column_name }} ({{ tasks|length }})</h3>
+
+            {% if tasks %}
+                {% for task in tasks %}
+                    <article class="task">
+                        <div class="task-title">
+                            <a href="{{ task.url }}" target="_blank" rel="noopener">
+                                {{ task.id }} - {{ task.title }}
+                            </a>
+                        </div>
+                        <div class="task-meta">
+                            <div>Status: {{ task.status }}</div>
+                            <div>Priority: {{ task.priority }}</div>
+                            <div>Updated: {{ task.updated }}</div>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p>No tasks in this group.</p>
+            {% endif %}
+        </section>
+    {% endfor %}
+</div>
+
+{% endblock %}
