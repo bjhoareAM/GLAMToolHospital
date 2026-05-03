@@ -16,11 +16,20 @@
         Reports submitted here are filed to Phabricator by the GLAM Tool Hospital bot account.
         Only include information you are comfortable appearing in a public task.
     </p>
+
 </section>
 
 {% if message %}
-<div class="message {% if is_error %}message-error{% else %}message-success{% endif %}">
-    {{ message }}
+<div class="message {% if is_error %}message-error{% else %}message-success message-prominent{% endif %}">
+    <strong>{{ message }}</strong>
+
+    {% if task_url and not is_error %}
+        <p>
+            <a href="{{ task_url }}" target="_blank" rel="noopener">
+                View the Phabricator ticket
+            </a>
+        </p>
+    {% endif %}
 </div>
 {% endif %}
 
@@ -53,12 +62,18 @@
         </div>
 
         <label for="email">Email address, optional</label>
+        <p class="hint">
+            The GLAM Tool Hospital bot will post this report to Phabricator on your behalf.
+            Unless you have your own Phabricator account and choose to comment there separately,
+            you will not automatically be able to participate in the Phabricator discussion.
+            If you would like follow-up, include an email address you are comfortable having copied into the public task.
+        </p>
         <input
             type="email"
             id="email"
             name="email"
             value="{{ form_data.get('email', '') }}"
-            placeholder="Only include this if you are comfortable being contacted by email"
+            placeholder="name@example.org"
         >
 
         <div class="button-row">
@@ -84,23 +99,25 @@
             {% endfor %}
         </select>
 
-        <label for="tool_name">Tool name, if known</label>
-        <input
-            type="text"
-            id="tool_name"
-            name="tool_name"
-            value="{{ form_data.get('tool_name', '') }}"
-            placeholder="For example: GLAMorgan, OpenRefine, ISA Tool, Pattypan"
-        >
+        <div id="other-tool-fields" class="conditional-fields">
+            <label for="tool_name">Tool name, if known</label>
+            <input
+                type="text"
+                id="tool_name"
+                name="tool_name"
+                value="{{ form_data.get('tool_name', '') }}"
+                placeholder="For example: WDLite, a Toolforge tool, a gadget, or another Wikimedia tool"
+            >
 
-        <label for="tool_url">Tool URL, if you have it</label>
-        <input
-            type="url"
-            id="tool_url"
-            name="tool_url"
-            value="{{ form_data.get('tool_url', '') }}"
-            placeholder="https://..."
-        >
+            <label for="tool_url">Tool URL, if you have it</label>
+            <input
+                type="url"
+                id="tool_url"
+                name="tool_url"
+                value="{{ form_data.get('tool_url', '') }}"
+                placeholder="https://..."
+            >
+        </div>
 
         <div class="button-row">
             <button type="button" class="button-secondary previous-step">Back</button>
@@ -118,6 +135,16 @@
             {% for option in issue_type_options %}
             <option value="{{ option.value }}" {% if form_data.get('issue_type') == option.value %}selected{% endif %}>
                 {{ option.label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label for="priority">Priority</label>
+        <select id="priority" name="priority">
+            <option value="">Select one</option>
+            {% for option in priority_options %}
+            <option value="{{ option.value }}" {% if form_data.get('priority') == option.value %}selected{% endif %}>
+                {{ option.label }} — {{ option.description }}
             </option>
             {% endfor %}
         </select>
@@ -212,7 +239,15 @@
 
         <div class="review-note">
             <strong>Ready to submit?</strong>
-            <p>This will create a public Phabricator ticket using the information you have provided.</p>
+            <p>
+                This will create a public Phabricator ticket using the information you have provided.
+                The ticket will be posted by the GLAM Tool Hospital bot account.
+            </p>
+            <p>
+                If you do not have a Phabricator account, you will not automatically be able to participate
+                in the discussion after the ticket is created. If you included an email address, triagers may
+                use it to contact you outside Phabricator.
+            </p>
         </div>
 
         <div class="button-row">

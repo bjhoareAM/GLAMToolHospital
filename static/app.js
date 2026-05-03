@@ -5,6 +5,11 @@ const currentStepNumber = document.getElementById("currentStepNumber");
 const totalStepNumber = document.getElementById("totalStepNumber");
 const wikiUsernameInput = document.getElementById("wiki_username");
 
+const projectTagSelect = document.getElementById("project_tag");
+const otherToolFields = document.getElementById("other-tool-fields");
+const toolNameInput = document.getElementById("tool_name");
+const toolUrlInput = document.getElementById("tool_url");
+
 let currentStep = 0;
 
 if (totalStepNumber) {
@@ -40,6 +45,30 @@ function validateCurrentStep() {
     }
 
     return true;
+}
+
+function updateOtherToolFields() {
+    if (!projectTagSelect || !otherToolFields) {
+        return;
+    }
+
+    const showFields = projectTagSelect.value === "other";
+    otherToolFields.hidden = !showFields;
+
+    if (!showFields) {
+        if (toolNameInput) {
+            toolNameInput.value = "";
+        }
+
+        if (toolUrlInput) {
+            toolUrlInput.value = "";
+        }
+    }
+}
+
+if (projectTagSelect && otherToolFields) {
+    projectTagSelect.addEventListener("change", updateOtherToolFields);
+    updateOtherToolFields();
 }
 
 nextButtons.forEach((button) => {

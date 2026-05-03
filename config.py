@@ -128,3 +128,42 @@ IMPACT_OPTIONS = [
     ("Minor", "This is a small issue or question"),
     ("Not sure", "I am not sure"),
 ]
+
+PRIORITY_OPTIONS = [
+    {
+        "value": "triage",
+        "label": "Needs triage",
+        "description": "I am not sure how urgent this is.",
+        "phabricator_priority": "triage",
+    },
+    {
+        "value": "lowest",
+        "label": "Lowest",
+        "description": "Nice-to-have improvement or very minor issue.",
+        "phabricator_priority": "lowest",
+    },
+    {
+        "value": "low",
+        "label": "Low",
+        "description": "Minor issue, question, or non-urgent improvement.",
+        "phabricator_priority": "low",
+    },
+    {
+        "value": "normal",
+        "label": "Normal",
+        "description": "Useful issue to resolve, but not blocking work.",
+        "phabricator_priority": "normal",
+    },
+    {
+        "value": "high",
+        "label": "High",
+        "description": "Important issue affecting active work.",
+        "phabricator_priority": "high",
+    },
+    {
+        "value": "unbreak",
+        "label": "Unbreak now",
+        "description": "A critical workflow is blocked or an important tool/workflow is unusable.",
+        "phabricator_priority": "unbreak",
+    },
+]

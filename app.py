@@ -9,11 +9,13 @@ from config import (
     MAX_SCREENSHOTS,
     MAX_UPLOAD_SIZE_BYTES,
     PROJECT_TAG_OPTIONS,
+    PRIORITY_OPTIONS,
 )
 
 from forms import (
     build_task_description,
     build_task_title,
+    get_phabricator_priority,
     get_project_phids_for_submission,
 )
 
@@ -32,15 +34,17 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE_BYTES
 
 
-def render_form(message=None, is_error=False, form_data=None):
+def render_form(message=None, is_error=False, form_data=None, task_url=None):
     return render_template(
         "index.html",
         message=message,
         is_error=is_error,
         form_data=form_data or {},
+        task_url=task_url,
         issue_type_options=ISSUE_TYPE_OPTIONS,
         project_tag_options=PROJECT_TAG_OPTIONS,
         impact_options=IMPACT_OPTIONS,
+        priority_options=PRIORITY_OPTIONS,
         max_screenshots=MAX_SCREENSHOTS,
     )
 
@@ -89,6 +93,7 @@ def submit():
             uploaded_files=uploaded_files,
         )
         project_phids = get_project_phids_for_submission(form_data)
+        priority = get_phabricator_priority(form_data.get("priority"))
 
         if DRY_RUN:
             return render_form(
@@ -101,19 +106,16 @@ def submit():
             title=title,
             description=description,
             project_phids=project_phids,
+            priority=priority,
         )
 
         task_url = result.get("task_url", "")
 
-        if task_url:
-            message = f"Ticket posted successfully: {task_url}"
-        else:
-            message = "Ticket posted successfully."
-
         return render_form(
-            message=message,
+            message="Ticket posted successfully.",
             is_error=False,
             form_data={},
+            task_url=task_url,
         )
 
     except Exception as e:
@@ -130,15 +132,9 @@ def board():
     current_filter = request.args.get("tool", "").strip()
 
     quick_filters = [
-        "OpenRefine",
-        "Pattypan",
-        "GLAMorgan",
-        "ISA",
-        "BHL",
-        "Mix'n'match",
-        "Wikidata",
-        "Commons",
-        "TemplateWizard",
+        option["label"]
+        for option in PROJECT_TAG_OPTIONS
+        if option.get("value") != "other"
     ]
 
     grouped = {

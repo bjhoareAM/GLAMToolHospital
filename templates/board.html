@@ -6,38 +6,55 @@
 
 <h2>Live tracker</h2>
 
-<div class="status-card">
-    <p><strong>Refreshed at:</strong> {{ refreshed_at }}</p>
-    <p><strong>Current filter:</strong> {{ current_filter or "None" }}</p>
-    <p><strong>Showing:</strong> {{ shown_count }} of {{ total_count }} tasks</p>
-</div>
+<p class="page-intro">
+    View recent reports submitted through the GLAM Tool Hospital and filter them by tool or project area.
+</p>
 
-<div class="filter-box">
-    <form class="filter-form" action="{{ url_for('board') }}" method="get">
+<section class="tracker-panel">
+    <div class="tracker-summary">
         <div>
-            <label for="tool">Filter by GLAM tool</label>
-            <input
-                id="tool"
-                name="tool"
-                value="{{ current_filter }}"
-                placeholder="e.g. OpenRefine, GLAMorgan, ISA"
-            >
+            <span class="summary-label">Tasks shown</span>
+            <span class="summary-value">{{ shown_count }} / {{ total_count }}</span>
         </div>
 
-        <button type="submit" class="button-primary">Filter</button>
-        <a href="{{ url_for('board') }}" class="button-link">Clear</a>
-    </form>
+        <div>
+            <span class="summary-label">Current filter</span>
+            <span class="summary-value">{{ current_filter or "None" }}</span>
+        </div>
 
-    <div class="quick-filters">
-        <strong>Quick filters:</strong>
-        {% for tool in quick_filters %}
-            <a
-                href="{{ url_for('board') }}?tool={{ tool|urlencode }}"
-                class="{% if current_filter|lower == tool|lower %}active-filter{% endif %}"
-            >{{ tool }}</a>
-        {% endfor %}
+        <div>
+            <span class="summary-label">Last refreshed</span>
+            <span class="summary-value">{{ refreshed_at }}</span>
+        </div>
     </div>
-</div>
+
+    <div class="filter-box filter-box-compact">
+        <form class="filter-form" action="{{ url_for('board') }}" method="get">
+            <div>
+                <label for="tool">Filter by GLAM tool</label>
+                <input
+                    id="tool"
+                    name="tool"
+                    value="{{ current_filter }}"
+                    placeholder="e.g. OpenRefine, GLAMorgan, ISA"
+                >
+            </div>
+
+            <button type="submit" class="button-primary">Filter</button>
+            <a href="{{ url_for('board') }}" class="button-link">Clear</a>
+        </form>
+
+        <div class="quick-filters">
+            <strong>Quick filters:</strong>
+            {% for tool in quick_filters %}
+                <a
+                    href="{{ url_for('board') }}?tool={{ tool|urlencode }}"
+                    class="{% if current_filter|lower == tool|lower %}active-filter{% endif %}"
+                >{{ tool }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
 {% if error %}
 <div class="message message-error">

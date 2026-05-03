@@ -1,6 +1,6 @@
 import os
 
-from config import PROJECT_PHID, PROJECT_TAG_OPTIONS
+from config import PROJECT_PHID, PROJECT_TAG_OPTIONS, PRIORITY_OPTIONS
 
 
 def normalize_wiki_username(raw_username: str) -> str:
@@ -16,9 +16,32 @@ def format_wiki_username(raw_username: str) -> str:
     username = normalize_wiki_username(raw_username)
 
     if not username:
-        return "Not provided"
+        return ""
 
     return f"User:{username}"
+
+
+def clean_value(value) -> str:
+    return (value or "").strip()
+
+
+def add_field(lines: list[str], label: str, value):
+    value = clean_value(value)
+
+    if value:
+        lines.append(f"**{label}:** {value}")
+
+
+def add_block(lines: list[str], heading: str, value):
+    value = clean_value(value)
+
+    if value:
+        lines.extend([
+            "",
+            f"**{heading}**",
+            "",
+            value,
+        ])
 
 
 def get_project_tag_label(project_tag_value: str) -> str:
@@ -26,7 +49,7 @@ def get_project_tag_label(project_tag_value: str) -> str:
         if option["value"] == project_tag_value:
             return option["label"]
 
-    return project_tag_value or "Not provided"
+    return project_tag_value or ""
 
 
 def get_project_tag_phid(project_tag_value: str):
@@ -53,6 +76,22 @@ def get_project_phids_for_submission(form_data: dict):
     return project_phids or None
 
 
+def get_phabricator_priority(priority_value: str):
+    for option in PRIORITY_OPTIONS:
+        if option["value"] == priority_value:
+            return option.get("phabricator_priority")
+
+    return None
+
+
+def get_priority_label(priority_value: str) -> str:
+    for option in PRIORITY_OPTIONS:
+        if option["value"] == priority_value:
+            return option["label"]
+
+    return ""
+
+
 def build_task_title(form_data: dict) -> str:
     project_label = get_project_tag_label(form_data.get("project_tag"))
 
@@ -65,83 +104,89 @@ def build_task_title(form_data: dict) -> str:
 
 def build_uploaded_files_text(uploaded_files: list[dict]) -> str:
     if not uploaded_files:
-        return "Not provided"
+        return ""
 
-    lines = []
+    blocks = []
 
     for uploaded in uploaded_files:
         filename = uploaded["filename"]
 
         if uploaded.get("phabricator_markup"):
-            lines.append(f"* {filename}: {uploaded['phabricator_markup']}")
+            file_markup = uploaded["phabricator_markup"]
+
+            # Put the file reference on its own line so Phabricator is more
+            # likely to render image uploads as an embedded preview.
+            # Example: {F123456, size=full}
+            if file_markup.startswith("{F") and file_markup.endswith("}"):
+                file_markup = file_markup[:-1] + ", size=full}"
+
+            blocks.append(
+                f"**{filename}**\n\n{file_markup}"
+            )
         else:
-            lines.append(
-                f"* {filename}: uploaded to Phabricator; identifier "
-                f"{uploaded['identifier']}"
+            blocks.append(
+                f"**{filename}**\n\nUploaded to Phabricator; identifier: {uploaded['identifier']}"
             )
 
-    return "\n".join(lines)
+    return "\n\n".join(blocks)
 
 
 def build_task_description(form_data: dict, uploaded_files=None) -> str:
     project_label = get_project_tag_label(form_data.get("project_tag"))
-    email_value = form_data.get("email") or "Not provided"
     uploaded_files_text = build_uploaded_files_text(uploaded_files or [])
 
-    return f"""
-This task was submitted via the GLAM Tool Hospital reporting form.
+    lines = [
+        "This task was submitted via the GLAM Tool Hospital reporting form.",
+        "",
+        "Note: This task was created automatically by the GLAM Tool Hospital bot account. The submitter listed below is the person who provided the report, if supplied.",
+        "",
+        "**Reporter**",
+    ]
 
-Note: This task was created automatically by the GLAM Tool Hospital bot account. The submitter listed below is the person who provided the report, if supplied.
+    add_field(lines, "Wiki username", format_wiki_username(form_data.get("wiki_username")))
+    add_field(lines, "Email", form_data.get("email"))
 
-== Reporter ==
+    lines.extend([
+        "",
+        "**Tool or project area**",
+    ])
 
-Wiki username: {format_wiki_username(form_data.get('wiki_username'))}
-Email: {email_value}
+    add_field(lines, "Tool/project area", project_label)
+    add_field(lines, "Tool name", form_data.get("tool_name"))
+    add_field(lines, "Tool URL", form_data.get("tool_url"))
 
-== Tool or project area ==
+    lines.extend([
+        "",
+        "**Request type**",
+    ])
 
-Tool/project area: {project_label}
-Tool name: {form_data.get('tool_name') or 'Not provided'}
-Tool URL: {form_data.get('tool_url') or 'Not provided'}
+    add_field(lines, "Issue type", form_data.get("issue_type"))
+    add_field(lines, "Priority", get_priority_label(form_data.get("priority")))
+    add_field(lines, "Impact", form_data.get("impact"))
 
-== Request type ==
+    add_block(lines, "Summary", form_data.get("summary"))
+    add_block(lines, "What was the person trying to do?", form_data.get("goal"))
+    add_block(lines, "What happened?", form_data.get("description"))
+    add_block(lines, "What did they expect to happen?", form_data.get("expected_result"))
+    add_block(lines, "What actually happened?", form_data.get("actual_result"))
+    add_block(lines, "Steps already tried", form_data.get("steps_tried"))
 
-Issue type: {form_data['issue_type']}
-Impact: {form_data.get('impact') or 'Not provided'}
+    if uploaded_files_text:
+        lines.extend([
+            "",
+            "**Screenshots or supporting files**",
+            "",
+            uploaded_files_text,
+        ])
 
-== Summary ==
+    add_block(lines, "Links, examples, or extra context", form_data.get("extra_context"))
 
-{form_data['summary']}
+    lines.extend([
+        "",
+        "**Internal routing metadata**",
+    ])
 
-== What was the person trying to do? ==
+    add_field(lines, "Project tag", form_data.get("project_tag"))
+    add_field(lines, "Priority value", form_data.get("priority"))
 
-{form_data.get('goal') or 'Not provided'}
-
-== What happened? ==
-
-{form_data.get('description') or 'Not provided'}
-
-== What did they expect to happen? ==
-
-{form_data.get('expected_result') or 'Not provided'}
-
-== What actually happened? ==
-
-{form_data.get('actual_result') or 'Not provided'}
-
-== Steps already tried ==
-
-{form_data.get('steps_tried') or 'Not provided'}
-
-== Screenshots or supporting files ==
-
-{uploaded_files_text}
-
-== Links, examples, or extra context ==
-
-{form_data.get('extra_context') or 'Not provided'}
-
-== Internal routing metadata ==
-
-Project tag: {form_data.get('project_tag') or 'Not provided'}
-""".strip()
+    return "\n".join(lines).strip()

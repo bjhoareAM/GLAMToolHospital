@@ -11,16 +11,27 @@
 
 <body>
     <header class="app-header">
-        <div>
-            <h1 class="app-title">GLAM Tool Hospital</h1>
-            <p class="app-subtitle">A lightweight reporting route for Wikimedia and GLAM tool issues.</p>
-        </div>
+    <div class="app-header-inner">
+        <a href="{{ url_for('home') }}" class="app-brand">
+           <img
+    src="{{ url_for('static', filename='images/logo_transparent.png') }}?v=4"
+    alt="GLAM Tool Hospital logo"
+    class="app-logo-img"
+>
+                        <div>
+                <h1 class="app-title">GLAM Tool Hospital</h1>
+                <p class="app-subtitle">
+                    A reporting route for GLAM tool issues, for GLAM users.
+                </p>
+            </div>
+        </a>
 
-        <nav class="app-nav">
+        <nav class="app-nav" aria-label="Main navigation">
             <a href="{{ url_for('home') }}">Submit issue</a>
             <a href="{{ url_for('board') }}">Live tracker</a>
         </nav>
-    </header>
+    </div>
+</header>
 
     <main class="app-main">
         {% block content %}{% endblock %}

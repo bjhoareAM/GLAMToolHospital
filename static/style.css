@@ -14,34 +14,89 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Header */
+
 .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     background: #fff;
-    border-bottom: 1px solid #a2a9b1;
-    padding: 20px 32px;
+    color: #202122;
+    border-bottom: 4px solid #36c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.app-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
     display: flex;
     justify-content: space-between;
     gap: 24px;
-    align-items: flex-start;
+    align-items: center;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #202122;
+    text-decoration: none;
+}
+
+.app-brand:hover {
+    text-decoration: none;
+}
+
+.app-logo-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    display: block;
+    background: transparent;
 }
 
 .app-title {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.9rem;
+    line-height: 1.1;
+    color: #202122;
 }
 
 .app-subtitle {
     margin: 4px 0 0;
     color: #54595d;
+    font-size: 1rem;
 }
 
 .app-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
     white-space: nowrap;
 }
 
 .app-nav a {
-    margin-left: 16px;
+    color: #36c;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.05rem;
+    padding: 8px 12px;
+    border-radius: 2px;
+}
+
+.app-nav a:hover,
+.app-nav a:focus {
+    background: #eaf3ff;
     text-decoration: none;
 }
+
+.app-nav a.active-nav {
+    background: #36c;
+    color: #fff;
+}
+
+/* Layout */
 
 .app-main {
     max-width: 920px;
@@ -50,7 +105,6 @@ a:hover {
 }
 
 .intro-card,
-.status-card,
 .filter-box,
 .review-note {
     background: #fff;
@@ -58,6 +112,8 @@ a:hover {
     padding: 16px;
     margin-bottom: 20px;
 }
+
+/* Forms */
 
 label {
     display: block;
@@ -126,6 +182,8 @@ button,
     background: #fff;
 }
 
+/* Messages */
+
 .message {
     padding: 14px 16px;
     margin-bottom: 20px;
@@ -141,6 +199,18 @@ button,
     border-left: 4px solid #d73333;
     background: #fff6f6;
 }
+
+.message-prominent {
+    border-left: 6px solid #14866d;
+    background: #f1f8f1;
+    font-size: 1.05rem;
+}
+
+.message-prominent a {
+    font-weight: bold;
+}
+
+/* Stepped form */
 
 .step-progress {
     margin: 20px 0;
@@ -180,33 +250,54 @@ button,
     margin-top: 0;
 }
 
-.columns {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
+/* Live tracker */
+
+.page-intro {
+    color: #54595d;
+    margin-top: -8px;
+    margin-bottom: 20px;
 }
 
-.column {
+.tracker-panel {
     background: #fff;
     border: 1px solid #a2a9b1;
-    padding: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
 }
 
-.task {
-    border: 1px solid #c8ccd1;
-    background: #fff;
-    padding: 12px;
-    margin-bottom: 12px;
+.tracker-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #c8ccd1;
 }
 
-.task-title {
-    font-weight: bold;
+.tracker-summary > div {
+    background: #f8f9fa;
+    border: 1px solid #eaecf0;
+    padding: 12px 14px;
 }
 
-.task-meta {
+.summary-label {
+    display: block;
     color: #54595d;
     font-size: 0.9rem;
-    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+.summary-value {
+    display: block;
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+.filter-box-compact {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
 }
 
 .filter-form {
@@ -236,4 +327,65 @@ button,
 .quick-filters .active-filter {
     font-weight: bold;
     background: #eaf3ff;
+}
+
+/* Task columns */
+
+.columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.column {
+    background: #fff;
+    border: 1px solid #a2a9b1;
+    padding: 14px;
+}
+
+.task {
+    border: 1px solid #c8ccd1;
+    background: #fff;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.task-title {
+    font-weight: bold;
+}
+
+.task-meta {
+    color: #54595d;
+    font-size: 0.9rem;
+    margin-top: 6px;
+}
+
+/* Small screens */
+
+@media (max-width: 700px) {
+    .app-header-inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .app-nav {
+        width: 100%;
+    }
+
+    .app-nav a {
+        padding-left: 0;
+    }
+
+    .app-logo-img {
+        width: 56px;
+        height: 56px;
+    }
+
+    .app-title {
+        font-size: 1.6rem;
+    }
+}
+
+.conditional-fields[hidden] {
+    display: none;
 }
